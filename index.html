@@ -1,0 +1,991 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Diesel n' Steel — Fare Calculator</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#292929;
+  color:#eee;
+}
+
+/* HEADER */
+
+header{
+  text-align:center;
+  padding:20px 16px 13px;
+  border-bottom:1px solid #555;
+}
+
+.logo{
+  margin:0;
+  font-size:clamp(27px,5vw,40px);
+  letter-spacing:2px;
+  font-weight:800;
+  color:#ff7900;
+  text-shadow:0 0 10px rgba(255,121,0,.3);
+}
+
+.logo span{
+  color:#aaa;
+}
+
+.subtitle{
+  margin:5px 0 0;
+  color:#bbb;
+  font-size:13px;
+}
+
+/* MAIN */
+
+main{
+  width:min(850px,calc(100% - 28px));
+  margin:16px auto 20px;
+}
+
+.card{
+  background:#171717;
+  border:1px solid #444;
+  border-radius:12px;
+  box-shadow:0 8px 28px rgba(0,0,0,.28);
+  padding:18px;
+}
+
+h2{
+  margin:0 0 12px;
+  color:#ffbd19;
+  font-size:21px;
+  letter-spacing:1px;
+}
+
+.route-name{
+  color:#ff7a00;
+  font-weight:800;
+  font-size:14px;
+  margin-bottom:13px;
+}
+
+/* INPUT GRID */
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 150px;
+  gap:10px;
+}
+
+label{
+  display:block;
+  margin-bottom:5px;
+  color:#ddd;
+  font-weight:700;
+  font-size:13px;
+}
+
+select,
+input{
+  width:100%;
+  padding:11px 12px;
+  background:#242424;
+  color:white;
+  border:1px solid #555;
+  border-radius:8px;
+  font-size:15px;
+  outline:none;
+}
+
+select:focus,
+input:focus{
+  border-color:#ff9b19;
+}
+
+/* PASSENGER TYPE */
+
+.passenger-section{
+  margin-top:12px;
+}
+
+.radio-row{
+  display:flex;
+  gap:8px;
+}
+
+.radio-row label{
+  margin:0;
+  padding:9px 13px;
+  background:#242424;
+  border:1px solid #555;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+}
+
+.radio-row input{
+  width:auto;
+  margin-right:5px;
+  accent-color:#ff8a00;
+}
+
+/* ROUTE */
+
+.route-info{
+  margin-top:11px;
+  padding:10px 12px;
+  border-left:3px solid #ff7900;
+  background:#222;
+  color:#ccc;
+  font-size:13px;
+}
+
+/* CASH */
+
+.cash-section{
+  margin-top:13px;
+}
+
+.bill-title{
+  margin:0 0 7px;
+  color:#ddd;
+  font-weight:700;
+  font-size:13px;
+}
+
+.bills{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.bill{
+  width:100%;
+  margin:0;
+  padding:11px 10px;
+  background:#242424;
+  color:#fff;
+  border:1px solid #555;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:16px;
+}
+
+.bill:hover{
+  background:#333;
+  border-color:#ff9b19;
+}
+
+.bill.selected{
+  background:#ff7900;
+  color:#111;
+  border-color:#ff7900;
+}
+
+.bill.selected:hover{
+  background:#ff971f;
+}
+
+/* CASH DISPLAY */
+
+.cash-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:8px;
+}
+
+.cash-display{
+  flex:1;
+  padding:10px 12px;
+  background:#101010;
+  border:1px solid #555;
+  border-radius:8px;
+  font-size:18px;
+  font-weight:800;
+  color:#ffbd19;
+}
+
+.clear{
+  width:auto;
+  margin:0;
+  padding:10px 15px;
+  background:#444;
+  color:#fff;
+  border:0;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:800;
+}
+
+.clear:hover{
+  background:#555;
+}
+
+/* CALCULATE */
+
+.calculate-btn{
+  width:100%;
+  margin-top:10px;
+  padding:11px;
+  border:0;
+  border-radius:8px;
+  background:#ff7900;
+  color:#111;
+  font-size:16px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.calculate-btn:hover{
+  background:#ff971f;
+}
+
+/* ERROR */
+
+.error{
+  color:#ff7777;
+  margin-top:8px;
+  font-weight:700;
+  font-size:13px;
+  text-align:center;
+}
+
+/* RESULTS */
+
+.result{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:10px;
+}
+
+.result-box{
+  background:#222;
+  border:1px solid #444;
+  border-radius:9px;
+  padding:10px 12px;
+}
+
+.result-box small{
+  color:#aaa;
+  display:block;
+  margin-bottom:4px;
+  font-size:12px;
+}
+
+.result-box strong{
+  font-size:21px;
+  color:#fff;
+}
+
+.result-box.total strong{
+  color:#ff9a00;
+}
+
+.change strong{
+  color:#7ee787;
+}
+
+/* FOOTER */
+
+footer{
+  text-align:center;
+  color:#888;
+  font-size:12px;
+  padding:4px 0 10px;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  main{
+    width:calc(100% - 18px);
+    margin-top:10px;
+  }
+
+  .grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .grid > div:last-child{
+    grid-column:1 / -1;
+  }
+
+}
+
+@media(max-width:480px){
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .grid > div:last-child{
+    grid-column:auto;
+  }
+
+  .radio-row{
+    flex-direction:column;
+  }
+
+  .result{
+    grid-template-columns:1fr;
+  }
+
+  .card{
+    padding:14px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+  <h1 class="logo">
+    DIESEL <span>n'</span> STEEL
+  </h1>
+
+  <p class="subtitle">
+    Origin-Destination Route Calculator
+  </p>
+
+</header>
+
+
+<main>
+
+<section class="card">
+
+  <h2>🚌 Route Calculator</h2>
+
+  <div class="route-name">
+    BULAKAN — VIA ATLAG — MALOLOS
+  </div>
+
+
+  <!-- ORIGIN / DESTINATION / PASSENGERS -->
+
+  <div class="grid">
+
+    <div>
+
+      <label for="origin">
+        Origin Barangay
+      </label>
+
+      <select id="origin"></select>
+
+    </div>
+
+
+    <div>
+
+      <label for="destination">
+        Destination Barangay
+      </label>
+
+      <select id="destination"></select>
+
+    </div>
+
+
+    <div>
+
+      <label for="passengers">
+        Number of passengers (1–5)
+      </label>
+
+      <input
+        id="passengers"
+        type="number"
+        min="1"
+        max="5"
+        value="1"
+      >
+
+    </div>
+
+  </div>
+
+
+  <!-- PASSENGER TYPE -->
+
+  <div class="passenger-section">
+
+    <label>
+      Passenger type
+    </label>
+
+    <div class="radio-row">
+
+      <label>
+        <input
+          type="radio"
+          name="type"
+          value="regular"
+          checked
+        >
+        Regular
+      </label>
+
+
+      <label>
+        <input
+          type="radio"
+          name="type"
+          value="discounted"
+        >
+        Student / Senior
+      </label>
+
+    </div>
+
+  </div>
+
+
+  <!-- ROUTE INFO -->
+
+  <div
+    class="route-info"
+    id="routeInfo"
+  >
+    Select an origin and destination.
+  </div>
+
+
+  <!-- CASH -->
+
+  <div class="cash-section">
+
+    <div class="bill-title">
+      Select cash received
+    </div>
+
+
+    <div class="bills">
+
+      <button
+        type="button"
+        class="bill"
+        data-bill="20"
+      >
+        ₱20
+      </button>
+
+      <button
+        type="button"
+        class="bill"
+        data-bill="50"
+      >
+        ₱50
+      </button>
+
+      <button
+        type="button"
+        class="bill"
+        data-bill="100"
+      >
+        ₱100
+      </button>
+
+    </div>
+
+
+    <div class="cash-row">
+
+      <div
+        class="cash-display"
+        id="cashDisplay"
+      >
+        ₱0
+      </div>
+
+
+      <button
+        type="button"
+        class="clear"
+        id="clearCash"
+      >
+        CLEAR
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- CALCULATE -->
+
+  <button
+    type="button"
+    class="calculate-btn"
+    id="calculate"
+  >
+    CALCULATE FARE
+  </button>
+
+
+  <!-- ERROR -->
+
+  <div
+    id="error"
+    class="error"
+  ></div>
+
+
+  <!-- RESULTS -->
+
+  <div class="result">
+
+    <div class="result-box">
+
+      <small>
+        Fare / passenger
+      </small>
+
+      <strong id="unitFare">
+        ₱0
+      </strong>
+
+    </div>
+
+
+    <div class="result-box total">
+
+      <small>
+        Total fare
+      </small>
+
+      <strong id="totalFare">
+        ₱0
+      </strong>
+
+    </div>
+
+
+    <div class="result-box change">
+
+      <small>
+        Sukli / change
+      </small>
+
+      <strong id="change">
+        ₱0
+      </strong>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+  Diesel n' Steel Route Calculator
+</footer>
+
+
+<script>
+
+/*
+  ROUTE STOPS
+
+  Slash-separated names are ONE barangay/stop.
+*/
+
+const barangays = [
+  "Bagumbayan / San Jose",
+  "Maysantol",
+  "San Nicolas",
+  "Pitpitan",
+  "Mambog",
+  "Matimbo",
+  "Panasahan",
+  "Bagna",
+  "Atlag",
+  "San Juan / Sto. Rosario"
+];
+
+
+/*
+  FARE MATRIX
+
+  Regular:
+  1-4 positions = ₱14
+  5 = ₱16
+  6 = ₱18
+  7 = ₱20
+  8 = ₱22
+  9 = ₱24
+  10 = ₱26
+
+  Discounted:
+  1-4 positions = ₱12
+  5 = ₱14
+  6 = ₱16
+  7 = ₱18
+  8 = ₱20
+  9 = ₱22
+  10 = ₱24
+
+  The matrix is NOT displayed.
+*/
+
+const regularFares = [
+  14, 14, 14, 14,
+  16, 18, 20, 22, 24, 26
+];
+
+const discountedFares = [
+  12, 12, 12, 12,
+  14, 16, 18, 20, 22, 24
+];
+
+
+const origin =
+  document.getElementById("origin");
+
+const destination =
+  document.getElementById("destination");
+
+const passengers =
+  document.getElementById("passengers");
+
+const cashDisplay =
+  document.getElementById("cashDisplay");
+
+const error =
+  document.getElementById("error");
+
+const unitFare =
+  document.getElementById("unitFare");
+
+const totalFare =
+  document.getElementById("totalFare");
+
+const change =
+  document.getElementById("change");
+
+const routeInfo =
+  document.getElementById("routeInfo");
+
+
+let discounted = false;
+let cash = 0;
+
+
+/* Peso format */
+
+function peso(amount){
+
+  return "₱" +
+    Number(amount).toLocaleString("en-PH");
+
+}
+
+
+/* Fill dropdowns */
+
+barangays.forEach((name, index) => {
+
+  const originOption =
+    document.createElement("option");
+
+  originOption.value = index;
+  originOption.textContent = name;
+
+  origin.appendChild(originOption);
+
+
+  const destinationOption =
+    document.createElement("option");
+
+  destinationOption.value = index;
+  destinationOption.textContent = name;
+
+  destination.appendChild(destinationOption);
+
+});
+
+
+/*
+  Start with different
+  origin and destination.
+*/
+
+destination.selectedIndex = 1;
+
+
+/*
+  Get fare from matrix.
+
+  Route positions =
+  difference + 1
+*/
+
+function getFare(originIndex, destinationIndex){
+
+  const routePositions =
+    Math.abs(destinationIndex - originIndex) + 1;
+
+  const fareTable =
+    discounted
+      ? discountedFares
+      : regularFares;
+
+  return fareTable[routePositions - 1];
+
+}
+
+
+/* Main calculation */
+
+function calculate(){
+
+  error.textContent = "";
+
+
+  const originIndex =
+    Number(origin.value);
+
+  const destinationIndex =
+    Number(destination.value);
+
+  const count =
+    Number(passengers.value);
+
+
+  /* Passenger validation */
+
+  if(
+    !Number.isInteger(count) ||
+    count < 1 ||
+    count > 5
+  ){
+
+    error.textContent =
+      "Passenger count must be between 1 and 5.";
+
+    return;
+
+  }
+
+
+  /* Same origin/destination */
+
+  if(originIndex === destinationIndex){
+
+    routeInfo.textContent =
+      "Origin and destination cannot be the same.";
+
+    unitFare.textContent = "₱0";
+    totalFare.textContent = "₱0";
+
+    change.textContent =
+      cash > 0 ? peso(cash) : "₱0";
+
+    error.textContent =
+      "Please select a different destination.";
+
+    return;
+
+  }
+
+
+  /* Get fare */
+
+  const fare =
+    getFare(
+      originIndex,
+      destinationIndex
+    );
+
+
+  /* Multiple passengers */
+
+  const total =
+    fare * count;
+
+
+  /* Change */
+
+  let difference = 0;
+
+
+  if(cash > 0 && cash >= total){
+
+    difference =
+      cash - total;
+
+  }
+
+
+  /* Route display */
+
+  routeInfo.innerHTML =
+    `<strong>${barangays[originIndex]}</strong>
+     →
+     <strong>${barangays[destinationIndex]}</strong>`;
+
+
+  /* Results */
+
+  unitFare.textContent =
+    peso(fare);
+
+  totalFare.textContent =
+    peso(total);
+
+  change.textContent =
+    difference > 0
+      ? peso(difference)
+      : "₱0";
+
+
+  /* Insufficient cash */
+
+  if(cash > 0 && cash < total){
+
+    error.textContent =
+      "Insufficient cash. Select another bill.";
+
+  }
+
+}
+
+
+/* Passenger type */
+
+document
+  .querySelectorAll('input[name="type"]')
+  .forEach(radio => {
+
+    radio.addEventListener("change", () => {
+
+      discounted =
+        radio.value === "discounted";
+
+      calculate();
+
+    });
+
+  });
+
+
+/* Passenger count */
+
+passengers.addEventListener(
+  "input",
+  calculate
+);
+
+
+/* Origin / destination */
+
+origin.addEventListener(
+  "change",
+  calculate
+);
+
+destination.addEventListener(
+  "change",
+  calculate
+);
+
+
+/* Bill buttons */
+
+document
+  .querySelectorAll(".bill")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      document
+        .querySelectorAll(".bill")
+        .forEach(btn => {
+
+          btn.classList.remove("selected");
+
+        });
+
+
+      button.classList.add("selected");
+
+
+      cash =
+        Number(button.dataset.bill);
+
+
+      cashDisplay.textContent =
+        peso(cash);
+
+
+      calculate();
+
+    });
+
+  });
+
+
+/* Clear cash */
+
+document
+  .getElementById("clearCash")
+  .addEventListener("click", () => {
+
+    cash = 0;
+
+
+    document
+      .querySelectorAll(".bill")
+      .forEach(btn => {
+
+        btn.classList.remove("selected");
+
+      });
+
+
+    cashDisplay.textContent =
+      peso(cash);
+
+
+    calculate();
+
+  });
+
+
+/* Calculate button */
+
+document
+  .getElementById("calculate")
+  .addEventListener(
+    "click",
+    calculate
+  );
+
+
+/* Initial */
+
+calculate();
+
+</script>
+
+</body>
+</html>
+```
