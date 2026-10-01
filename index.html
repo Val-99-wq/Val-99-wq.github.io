@@ -1,0 +1,792 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diesel n' Steel — Route Calculator</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#292929;
+  color:#eee
+}
+
+header{
+  text-align:center;
+  padding:28px 16px 18px;
+  border-bottom:1px solid #555
+}
+
+.logo{
+  margin:0;
+  font-size:clamp(27px,5vw,42px);
+  letter-spacing:2px;
+  font-weight:800;
+  color:#ff7900;
+  text-shadow:0 0 10px rgba(255,121,0,.3)
+}
+
+.logo span{color:#aaa}
+
+.subtitle{
+  margin:8px 0 0;
+  color:#bbb;
+  font-size:14px
+}
+
+main{
+  width:min(700px,calc(100% - 28px));
+  margin:24px auto 50px
+}
+
+.card{
+  background:#171717;
+  border:1px solid #444;
+  border-radius:12px;
+  box-shadow:0 8px 28px rgba(0,0,0,.28);
+  padding:22px;
+  margin-bottom:20px
+}
+
+h2{
+  margin:0 0 17px;
+  color:#ffbd19;
+  font-size:22px;
+  letter-spacing:1px
+}
+
+.route-name{
+  color:#ff7a00;
+  font-weight:800
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px
+}
+
+label{
+  display:block;
+  margin-bottom:7px;
+  color:#ddd;
+  font-weight:700
+}
+
+select,input{
+  width:100%;
+  padding:13px 14px;
+  background:#242424;
+  color:white;
+  border:1px solid #555;
+  border-radius:8px;
+  font-size:16px;
+  outline:none
+}
+
+select:focus,input:focus{
+  border-color:#ff9b19
+}
+
+.radio-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap
+}
+
+.radio-row label{
+  margin:0;
+  padding:12px 15px;
+  background:#242424;
+  border:1px solid #555;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600
+}
+
+.radio-row input{
+  width:auto;
+  margin-right:7px;
+  accent-color:#ff8a00
+}
+
+.bill-title{
+  margin:18px 0 9px;
+  color:#ddd;
+  font-weight:700
+}
+
+.bills{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px
+}
+
+.bill{
+  margin:0;
+  padding:15px 10px;
+  background:#242424;
+  color:#fff;
+  border:1px solid #555;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:17px
+}
+
+.bill:hover{
+  background:#333;
+  border-color:#ff9b19
+}
+
+.cash-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:10px
+}
+
+.cash-display{
+  flex:1;
+  padding:13px 14px;
+  background:#101010;
+  border:1px solid #555;
+  border-radius:8px;
+  font-size:20px;
+  font-weight:800;
+  color:#ffbd19
+}
+
+.clear{
+  width:auto;
+  margin:0;
+  padding:12px 16px;
+  background:#444;
+  color:#fff
+}
+
+button{
+  width:100%;
+  margin-top:18px;
+  padding:14px;
+  border:0;
+  border-radius:8px;
+  background:#ff7900;
+  color:#111;
+  font-size:17px;
+  font-weight:900;
+  cursor:pointer
+}
+
+button:hover{
+  background:#ff971f
+}
+
+.result{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:18px
+}
+
+.result-box{
+  background:#222;
+  border:1px solid #444;
+  border-radius:9px;
+  padding:15px
+}
+
+.result-box small{
+  color:#aaa;
+  display:block;
+  margin-bottom:6px
+}
+
+.result-box strong{
+  font-size:24px;
+  color:#fff
+}
+
+.result-box.total strong{
+  color:#ff9a00
+}
+
+.change strong{
+  color:#7ee787
+}
+
+.error{
+  color:#ff7777;
+  margin-top:10px;
+  font-weight:700
+}
+
+.route-info{
+  margin-top:15px;
+  padding:13px 14px;
+  border-left:3px solid #ff7900;
+  background:#222;
+  color:#ccc;
+  font-size:14px;
+}
+
+footer{
+  text-align:center;
+  color:#888;
+  font-size:13px;
+  padding:10px 0 25px
+}
+
+@media(max-width:700px){
+
+  .grid,
+  .result{
+    grid-template-columns:1fr
+  }
+
+  .bills{
+    grid-template-columns:1fr 1fr 1fr
+  }
+
+  .card{
+    padding:16px
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+  <h1 class="logo">
+    DIESEL <span>n'</span> STEEL
+  </h1>
+
+  <p class="subtitle">
+    Origin-Destination Route Calculator
+  </p>
+
+</header>
+
+
+<main>
+
+<section class="card">
+
+  <h2>🚌 Route Calculator</h2>
+
+  <div class="route-name">
+    BULAKAN — VIA ATLAG — MALOLOS
+  </div>
+
+
+  <div class="grid" style="margin-top:18px">
+
+    <div>
+
+      <label for="origin">
+        Origin Barangay
+      </label>
+
+      <select id="origin"></select>
+
+    </div>
+
+
+    <div>
+
+      <label for="destination">
+        Destination Barangay
+      </label>
+
+      <select id="destination"></select>
+
+    </div>
+
+
+    <div>
+
+      <label for="passengers">
+        Number of passengers (1–5)
+      </label>
+
+      <input
+        id="passengers"
+        type="number"
+        min="1"
+        max="5"
+        value="1"
+      >
+
+    </div>
+
+  </div>
+
+
+  <div style="margin-top:18px">
+
+    <label>
+      Passenger type
+    </label>
+
+    <div class="radio-row">
+
+      <label>
+        <input
+          type="radio"
+          name="type"
+          value="regular"
+          checked
+        >
+        Regular
+      </label>
+
+
+      <label>
+        <input
+          type="radio"
+          name="type"
+          value="discounted"
+        >
+        Student / Senior
+      </label>
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="route-info"
+    id="routeInfo"
+  >
+    Select an origin and destination.
+  </div>
+
+
+  <div class="bill-title">
+    Cash received
+  </div>
+
+
+  <div class="bills">
+
+    <button
+      class="bill"
+      data-bill="20"
+    >
+      + ₱20
+    </button>
+
+    <button
+      class="bill"
+      data-bill="50"
+    >
+      + ₱50
+    </button>
+
+    <button
+      class="bill"
+      data-bill="100"
+    >
+      + ₱100
+    </button>
+
+  </div>
+
+
+  <div class="cash-row">
+
+    <div
+      class="cash-display"
+      id="cashDisplay"
+    >
+      ₱0
+    </div>
+
+
+    <button
+      class="clear"
+      id="clearCash"
+    >
+      CLEAR
+    </button>
+
+  </div>
+
+
+  <button id="calculate">
+    CALCULATE FARE
+  </button>
+
+
+  <div
+    id="error"
+    class="error"
+  ></div>
+
+
+  <div class="result">
+
+    <div class="result-box">
+
+      <small>
+        Fare / passenger
+      </small>
+
+      <strong id="unitFare">
+        ₱14
+      </strong>
+
+    </div>
+
+
+    <div class="result-box total">
+
+      <small>
+        Total fare
+      </small>
+
+      <strong id="totalFare">
+        ₱14
+      </strong>
+
+    </div>
+
+
+    <div class="result-box change">
+
+      <small>
+        Sukli / change
+      </small>
+
+      <strong id="change">
+        ₱0
+      </strong>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+  Diesel n' Steel Route Calculator
+</footer>
+
+
+<script>
+
+const barangays = [
+
+  "Bagumbayan (Bulakan)",
+  "San Jose",
+  "Maysantol",
+  "San Nicolas",
+  "Pitpitan",
+  "Mambog",
+  "Matimbo",
+  "Panasahan",
+  "Bagna",
+  "Atlag",
+  "San Juan",
+  "Sto. Rosario (Malolos)"
+
+];
+
+
+const origin =
+  document.getElementById("origin");
+
+const destination =
+  document.getElementById("destination");
+
+const passengers =
+  document.getElementById("passengers");
+
+const cashDisplay =
+  document.getElementById("cashDisplay");
+
+const error =
+  document.getElementById("error");
+
+const unitFare =
+  document.getElementById("unitFare");
+
+const totalFare =
+  document.getElementById("totalFare");
+
+const change =
+  document.getElementById("change");
+
+const routeInfo =
+  document.getElementById("routeInfo");
+
+
+let cash = 0;
+
+
+/* Format Philippine peso */
+
+function peso(n){
+
+  return "₱" +
+    Number(n).toLocaleString("en-PH");
+
+}
+
+
+/*
+  Calculate fare based on distance.
+
+  First 4 positions = minimum fare.
+  Every position after 4 = +₱2.
+*/
+
+function getFare(distance, discounted){
+
+  const extra =
+    Math.max(0, distance - 4) * 2;
+
+  return (discounted ? 12 : 14) + extra;
+
+}
+
+
+/* Fill origin and destination */
+
+barangays.forEach((name, index) => {
+
+  const originOption =
+    document.createElement("option");
+
+  originOption.value = index;
+  originOption.textContent = name;
+
+  origin.appendChild(originOption);
+
+
+  const destinationOption =
+    document.createElement("option");
+
+  destinationOption.value = index;
+  destinationOption.textContent = name;
+
+  destination.appendChild(destinationOption);
+
+});
+
+
+/* Calculate */
+
+function calculate(){
+
+  error.textContent = "";
+
+
+  const originIndex =
+    Number(origin.value);
+
+  const destinationIndex =
+    Number(destination.value);
+
+  const count =
+    Number(passengers.value);
+
+  const type =
+    document.querySelector(
+      'input[name="type"]:checked'
+    ).value;
+
+
+  /* Check passenger count */
+
+  if(
+    !Number.isInteger(count) ||
+    count < 1 ||
+    count > 5
+  ){
+
+    error.textContent =
+      "Passenger count must be between 1 and 5.";
+
+    return;
+
+  }
+
+
+  /* Same origin and destination */
+
+  if(originIndex === destinationIndex){
+
+    routeInfo.textContent =
+      "Origin and destination cannot be the same.";
+
+    unitFare.textContent = "₱0";
+    totalFare.textContent = "₱0";
+    change.textContent = "₱0";
+
+    error.textContent =
+      "Please select a different destination.";
+
+    return;
+
+  }
+
+
+  /* Calculate distance */
+
+  const distance =
+    Math.abs(
+      destinationIndex - originIndex
+    );
+
+
+  const fare =
+    getFare(
+      distance,
+      type === "discounted"
+    );
+
+
+  const total =
+    fare * count;
+
+
+  const difference =
+    cash - total;
+
+
+  /* Show route */
+
+  routeInfo.innerHTML =
+    `<strong>${barangays[originIndex]}</strong>
+     →
+     <strong>${barangays[destinationIndex]}</strong>
+     • ${distance} barangay position${distance === 1 ? "" : "s"} traveled`;
+
+
+  /* Show results */
+
+  unitFare.textContent =
+    peso(fare);
+
+  totalFare.textContent =
+    peso(total);
+
+
+  change.textContent =
+    difference >= 0
+      ? peso(difference)
+      : "₱0";
+
+
+  /* Insufficient cash */
+
+  if(difference < 0){
+
+    error.textContent =
+      "Insufficient cash. Add another ₱20, ₱50, or ₱100 bill.";
+
+  }
+
+}
+
+
+/* Bill buttons */
+
+document
+  .querySelectorAll(".bill")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      cash +=
+        Number(button.dataset.bill);
+
+      cashDisplay.textContent =
+        peso(cash);
+
+      calculate();
+
+    });
+
+  });
+
+
+/* Clear cash */
+
+document
+  .getElementById("clearCash")
+  .addEventListener("click", () => {
+
+    cash = 0;
+
+    cashDisplay.textContent =
+      peso(cash);
+
+    calculate();
+
+  });
+
+
+/* Calculate button */
+
+document
+  .getElementById("calculate")
+  .addEventListener(
+    "click",
+    calculate
+  );
+
+
+/* Automatic updates */
+
+origin.addEventListener(
+  "change",
+  calculate
+);
+
+destination.addEventListener(
+  "change",
+  calculate
+);
+
+passengers.addEventListener(
+  "input",
+  calculate
+);
+
+
+document
+  .querySelectorAll('input[name="type"]')
+  .forEach(el => {
+
+    el.addEventListener(
+      "change",
+      calculate
+    );
+
+  });
+
+
+/* Initial calculation */
+
+calculate();
+
+</script>
+
+</body>
+</html>
+```
